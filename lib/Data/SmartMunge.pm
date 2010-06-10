@@ -1,0 +1,122 @@
+use 5.008;
+use strict;
+use warnings;
+
+package Data::SmartMunge;
+BEGIN {
+  $Data::SmartMunge::VERSION = '1.101610';
+}
+
+# ABSTRACT: Munge scalars, hashes and arrays in flexible ways
+use Exporter qw(import);
+our %EXPORT_TAGS = (util => [qw(smart_munge)],);
+our @EXPORT_OK = @{ $EXPORT_TAGS{all} = [ map { @$_ } values %EXPORT_TAGS ] };
+my %munger_dispatch = (
+    STRING_CODE => sub { $_[1]->($_[0]) },
+    ARRAY_CODE  => sub { $_[1]->($_[0]) },
+    HASH_CODE   => sub { $_[1]->($_[0]) },
+    HASH_HASH   => sub { +{ %{ $_[0] }, %{ $_[1] } } },  # overlay
+);
+
+sub smart_munge {
+    my ($data, $munger) = @_;
+    return $data unless defined $munger;
+    my $data_ref   = ref $data   || 'STRING';
+    my $munger_ref = ref $munger || 'STRING';
+    if (my $handler = $munger_dispatch{ $data_ref . '_' . $munger_ref }) {
+        my $result = $handler->($data, $munger);
+        return $result unless wantarray;
+        return @$result if ref $result eq 'ARRAY';
+        return %$result if ref $result eq 'HASH';
+    } else {
+        die "can't munge $data_ref with $munger_ref";
+    }
+}
+
+
+__END__
+=pod
+
+=head1 NAME
+
+Data::SmartMunge - Munge scalars, hashes and arrays in flexible ways
+
+=head1 VERSION
+
+version 1.101610
+
+=head1 SYNOPSIS
+
+    use Data::SmartMunge ':all';
+
+    my $s = smart_munge('foo bar baz', sub { uc $_[0] });
+
+    my $a_ref = smart_munge([ 1 .. 4 ], sub { [ reverse @{ $_[0] } ] });
+    my @a = smart_munge([ 1 .. 4 ], sub { [ reverse @{ $_[0] } ] });
+
+    my %h = smart_munge(
+        { a => 'foo', b => 'bar' },
+        sub {
+            +{ map { $_ => uc $_[0]->{$_} } keys %{ $_[0] } };
+        },
+    );
+
+    my $h_ref = smart_munge(
+        { a => 'foo', b => 'bar' },
+        { a => undef, c => 'baz' },
+    );
+
+=head1 DESCRIPTION
+
+This module provides a generic way to munge scalars, hashes and arrays.
+
+=head1 FUNCTIONS
+
+=head2 smart_munge
+
+Takes as the first argument - the I<data> - either a scalar, an array
+reference or a hash reference. Takes as the second argument - the I<munger> -
+either a hash or a code reference. It tries to apply the munger to the data.
+For example, if the munger is a code reference, that code will be run with the
+data as an argument. If both data and munger are hash references, the munger
+hash will be overlaid onto the data hash and the result will be returned.
+
+If called in scalar context, any resulting array or hash will be returned as a
+reference. In list context, the array or hash will be returned as is.
+
+=head1 INSTALLATION
+
+See perlmodinstall for information and options on installing Perl modules.
+
+=head1 BUGS AND LIMITATIONS
+
+No bugs have been reported.
+
+Please report any bugs or feature requests through the web interface at
+L<http://rt.cpan.org>.
+
+=head1 AVAILABILITY
+
+The latest version of this module is available from the Comprehensive Perl
+Archive Network (CPAN). Visit L<http://www.perl.com/CPAN/> to find a CPAN
+site near you, or see
+L<http://search.cpan.org/dist/Data-SmartMunge/>.
+
+The development version lives at
+L<http://github.com/hanekomu/Data-SmartMunge/>.
+Instead of sending patches, please fork this project using the standard git
+and github infrastructure.
+
+=head1 AUTHOR
+
+  Marcel Gruenauer <marcel@cpan.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2010 by Marcel Gruenauer.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
+
+=cut
+
