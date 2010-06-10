@@ -22,7 +22,7 @@ name: Data-SmartMunge
 provides:
   Data::SmartMunge:
     file: lib/Data/SmartMunge.pm
-    version: 1.101610
+    version: 1.101611
 requires:
   Exporter: 0
   perl: 5.008
@@ -30,4 +30,4 @@ resources:
   bugtracker: http://rt.cpan.org/Public/Dist/Display.html?Name=Data-SmartMunge
   homepage: http://search.cpan.org/dist/Data-SmartMunge/
   repository: http://github.com/hanekomu/Data-SmartMunge
-version: 1.101610
+version: 1.101611

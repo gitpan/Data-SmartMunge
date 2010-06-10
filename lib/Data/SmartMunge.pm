@@ -4,7 +4,7 @@ use warnings;
 
 package Data::SmartMunge;
 BEGIN {
-  $Data::SmartMunge::VERSION = '1.101610';
+  $Data::SmartMunge::VERSION = '1.101611';
 }
 
 # ABSTRACT: Munge scalars, hashes and arrays in flexible ways
@@ -20,7 +20,13 @@ my %munger_dispatch = (
 
 sub smart_munge {
     my ($data, $munger) = @_;
-    return $data unless defined $munger;
+
+    unless (defined $munger) {
+        return $data unless wantarray;
+        return @$data if ref $data eq 'ARRAY';
+        return %$data if ref $data eq 'HASH';
+    }
+
     my $data_ref   = ref $data   || 'STRING';
     my $munger_ref = ref $munger || 'STRING';
     if (my $handler = $munger_dispatch{ $data_ref . '_' . $munger_ref }) {
@@ -43,7 +49,7 @@ Data::SmartMunge - Munge scalars, hashes and arrays in flexible ways
 
 =head1 VERSION
 
-version 1.101610
+version 1.101611
 
 =head1 SYNOPSIS
 
@@ -83,6 +89,9 @@ hash will be overlaid onto the data hash and the result will be returned.
 
 If called in scalar context, any resulting array or hash will be returned as a
 reference. In list context, the array or hash will be returned as is.
+
+If the munger is not defined, the data will be returned unchanged, again
+respecting context.
 
 =head1 INSTALLATION
 

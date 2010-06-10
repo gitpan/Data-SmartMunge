@@ -2,7 +2,7 @@ NAME
     Data::SmartMunge - Munge scalars, hashes and arrays in flexible ways
 
 VERSION
-    version 1.101610
+    version 1.101611
 
 SYNOPSIS
         use Data::SmartMunge ':all';
@@ -40,6 +40,9 @@ FUNCTIONS
     If called in scalar context, any resulting array or hash will be
     returned as a reference. In list context, the array or hash will be
     returned as is.
+
+    If the munger is not defined, the data will be returned unchanged, again
+    respecting context.
 
 INSTALLATION
     See perlmodinstall for information and options on installing Perl
