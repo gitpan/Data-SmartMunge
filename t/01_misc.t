@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 use warnings;
 use strict;
-use Data::SmartMunge ':all';
+use Data::SmartMunge qw(smart_munge);
 use Test::More tests => 7;
 use Test::Differences;
 

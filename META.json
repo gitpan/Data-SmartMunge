@@ -40,7 +40,7 @@
    "provides" : {
       "Data::SmartMunge" : {
          "file" : "lib/Data/SmartMunge.pm",
-         "version" : "1.101611"
+         "version" : "1.101612"
       }
    },
    "release_status" : "stable",
@@ -54,6 +54,6 @@
          "url" : "http://github.com/hanekomu/Data-SmartMunge"
       }
    },
-   "version" : "1.101611"
+   "version" : "1.101612"
 }
 

@@ -4,12 +4,12 @@ use warnings;
 
 package Data::SmartMunge;
 BEGIN {
-  $Data::SmartMunge::VERSION = '1.101611';
+  $Data::SmartMunge::VERSION = '1.101612';
 }
 
 # ABSTRACT: Munge scalars, hashes and arrays in flexible ways
 use Exporter qw(import);
-our %EXPORT_TAGS = (util => [qw(smart_munge)],);
+our %EXPORT_TAGS = (util => [qw(smart_munge delete_matching)],);
 our @EXPORT_OK = @{ $EXPORT_TAGS{all} = [ map { @$_ } values %EXPORT_TAGS ] };
 my %munger_dispatch = (
     STRING_CODE => sub { $_[1]->($_[0]) },
@@ -39,6 +39,14 @@ sub smart_munge {
     }
 }
 
+sub delete_matching {
+    my ($re, $flags) = @_;
+    $flags = '' unless defined $flags;
+    return $flags =~ s/g//
+        ?  sub { $_[0] =~ s/$re//g; $_[0] }
+        :  sub { $_[0] =~ s/$re//; $_[0] };
+}
+
 
 __END__
 =pod
@@ -49,13 +57,14 @@ Data::SmartMunge - Munge scalars, hashes and arrays in flexible ways
 
 =head1 VERSION
 
-version 1.101611
+version 1.101612
 
 =head1 SYNOPSIS
 
-    use Data::SmartMunge ':all';
+    use Data::SmartMunge qw(:all);
 
-    my $s = smart_munge('foo bar baz', sub { uc $_[0] });
+    my $s  = smart_munge('foo bar baz', sub { uc $_[0] });
+    my $s2 = smart_munge('foo bar baz bar baz', delete_matching(qr/bar\s*/, 'g'));
 
     my $a_ref = smart_munge([ 1 .. 4 ], sub { [ reverse @{ $_[0] } ] });
     my @a = smart_munge([ 1 .. 4 ], sub { [ reverse @{ $_[0] } ] });
@@ -92,6 +101,21 @@ reference. In list context, the array or hash will be returned as is.
 
 If the munger is not defined, the data will be returned unchanged, again
 respecting context.
+
+=head2 delete_matching
+
+Takes a regular expression as the first argument and flags like C<s///> does
+as the optional second argument. Returns a ready-made munger that deletes the
+part of the data that matches the regular expression. If the flag argument
+contains C<g>, all occurrences will be deleted.
+
+For example:
+
+    smart_munge('foo bar baz bar baz', delete_matching(qr/bar\s*/);
+    # returns 'foo baz bar baz'
+
+    smart_munge('foo bar baz bar baz', delete_matching(qr/bar\s*/, 'g');
+    # returns 'foo baz baz'
 
 =head1 INSTALLATION
 
